@@ -1,0 +1,102 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: cms-postgres
+    ports:
+      - ${POSTGRES_PORT}:5432
+    environment:
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    profiles:
+      - development
+    networks:
+      - local-network
+
+  auth:
+    container_name: cms-auth
+    build:
+      context: ../services/auth
+      dockerfile: Dockerfile
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@postgres:${POSTGRES_PORT}/auth_db
+      - AUTH_SERVICE_PORT=${AUTH_SERVICE_PORT}
+    ports:
+      - ${AUTH_SERVICE_PORT}:3001
+    volumes:
+      - ../services/auth:/usr/src/app
+    depends_on:
+      - postgres
+    profiles:
+      - development
+    command: npm run start:dev
+    networks:
+      - local-network
+
+  pages:
+    container_name: cms-pages
+    build:
+      context: ../services/pages
+      dockerfile: Dockerfile
+    environment:
+      - PAGE_SERVICE_PORT=${PAGE_SERVICE_PORT}
+      - DATABASE_URL=postgres://postgres:postgres@postgres:${POSTGRES_PORT}/page_db
+    ports:
+      - ${PAGE_SERVICE_PORT}:3002
+    volumes:
+      - ../services/pages:/usr/src/app
+    depends_on:
+      - postgres
+    command: npm run start:dev
+    profiles:
+      - development
+    networks:
+      - local-network
+
+  frontend:
+    container_name: cms-frontend
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    ports:
+      - ${FRONTEND_SERVICE_PORT}:3000
+    volumes:
+      - ../frontend:/app
+      - /app/node_modules # Исключаем node_modules хост-машины
+    command: npm run dev -- --host
+    profiles:
+      - development
+    networks:
+      - local-network
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: cms-nginx
+    ports:
+      - ${HTTP_PORT}:80
+      - ${HTTPS_PORT}:443
+    environment:
+      - NGINX_ENVSUBST_TEMPLATE_SUFFIX=.ngconf
+      - SERVER_NAME=${SERVER_NAME}
+      - AUTH_SERVICE_PORT=${AUTH_SERVICE_PORT}
+      - PAGE_SERVICE_PORT=${PAGE_SERVICE_PORT}
+      - FRONTEND_SERVICE_PORT=${FRONTEND_SERVICE_PORT}
+    profiles:
+      - development
+    volumes:
+      - ./nginx/templates/dev:/etc/nginx/templates
+      - ./nginx/certs:/etc/nginx/certs
+    depends_on:
+      - frontend
+      - auth
+      - pages
+    networks:
+      - local-network
+
+volumes:
+  postgres-data:
+
+networks:
+  local-network:

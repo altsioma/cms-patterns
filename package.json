@@ -1,0 +1,27 @@
+{
+  "name": "cms",
+  "version": "1.0.0",
+  "description": "универсальный генератор произвольных страниц",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "engines": {
+    "node": "22.15.1"
+  },
+  "engineStrict": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/altsioma/cms.git"
+  },
+  "author": "a.tsioma",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/altsioma/cms/issues"
+  },
+  "private": true,
+  "homepage": "https://github.com/altsioma/cms#readme"
+}
