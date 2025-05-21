@@ -1,0 +1,16 @@
+---
+config:
+  theme: base
+  look: classic
+  layout: elk
+---
+flowchart TD
+    A[Администратор] --> B[Создаёт JSON-конфигурацию страницы]
+    B --> C[POST /api/v1/page с JWT]
+    C --> D[Middleware проверяет токен и роль]
+    D --> E{Роль admin?}
+    E -- Нет --> F[Ошибка 403 Forbidden]
+    E -- Да --> G[PageService валидирует JSON]
+    G --> H[Проверка схемы компонентов]
+    H --> I[Сохранение в БД]
+    I --> J[Ответ: 201 Created + slug страницы]

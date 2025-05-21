@@ -1,0 +1,15 @@
+---
+config:
+  theme: base
+  look: classic
+  layout: elk
+---
+flowchart TD
+    A[Гость] --> B[Переходит по URL /:slug]
+    B --> C[Frontend запрашивает GET /api/v1/page/:slug]
+    C --> D[Page Service ищет конфигурацию в БД]
+    D --> E{Страница найдена?}
+    E -- Нет --> F[404 Not Found]
+    E -- Да --> G[Возврат JSON конфигурации]
+    G --> H[Frontend инициализирует ComponentRenderer]
+    H --> I[Рендерит UI по типам и props]
