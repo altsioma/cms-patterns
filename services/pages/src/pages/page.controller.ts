@@ -40,6 +40,7 @@ export class PageController {
     return this.pageService.create(dto);
   }
 
+  // Обновить страницу (только для админа)
   @Put(':slug')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
@@ -47,6 +48,7 @@ export class PageController {
     return this.pageService.update(slug, dto);
   }
 
+  // Удалить страницу (только для админа)
   @Delete(':slug')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
