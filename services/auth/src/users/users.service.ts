@@ -15,7 +15,7 @@ export class UsersService {
     return this.usersRepo.save(user);
   }
 
-  findByLogin(login: string) {
-    return this.usersRepo.findOne({ where: { login } });
+  async findByLogin(login: string) {
+    return this.usersRepo.findOneBy({ login });
   }
 }
