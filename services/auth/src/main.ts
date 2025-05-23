@@ -12,14 +12,14 @@ async function bootstrap() {
     AppModule,
     new FastifyAdapter(),
   );
-  const config = app.get(ConfigService);
 
+  const config = app.get(ConfigService);
   const port = config.get<number>('AUTH_SERVICE_PORT') || 3001;
   const globalPrefix = config.get<string>('GLOBAL_PREFIX') || '';
 
   app.setGlobalPrefix(globalPrefix);
 
-  Logger.log(`Сервер запущен на порту ${port}`, 'Server');
+  Logger.log(`Сервер работает на порту ${port}`, 'Server');
 
   await app.listen(port, '0.0.0.0');
 }

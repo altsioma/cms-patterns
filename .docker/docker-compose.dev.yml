@@ -10,6 +10,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres-data:/var/lib/postgresql/data
+      - ./db-init-scripts:/docker-entrypoint-initdb.d
     profiles:
       - development
     networks:
@@ -21,7 +22,6 @@ services:
       context: ../services/auth
       dockerfile: Dockerfile
     environment:
-      - DATABASE_URL=postgres://postgres:postgres@postgres:${POSTGRES_PORT}/auth_db
       - AUTH_SERVICE_PORT=${AUTH_SERVICE_PORT}
     ports:
       - ${AUTH_SERVICE_PORT}:3001
@@ -42,7 +42,6 @@ services:
       dockerfile: Dockerfile
     environment:
       - PAGE_SERVICE_PORT=${PAGE_SERVICE_PORT}
-      - DATABASE_URL=postgres://postgres:postgres@postgres:${POSTGRES_PORT}/page_db
     ports:
       - ${PAGE_SERVICE_PORT}:3002
     volumes:
