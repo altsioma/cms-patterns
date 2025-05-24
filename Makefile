@@ -13,3 +13,8 @@ install-certificates:
 dev-up:
 	echo "Запускается локальная разработка в development режиме"
 	docker compose -f .docker/docker-compose.dev.yml --profile development up
+
+# Сборка Docker контейнеров и их запуск для production режима
+prod-up:
+	echo "Запускаются контейнеры в production режиме"
+	docker compose -f .docker/docker-compose.prod.yml --env-file .docker/.env.prod up --build

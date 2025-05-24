@@ -1,0 +1,39 @@
+upstream frontend_upstream {
+    server frontend:${FRONTEND_SERVICE_PORT};
+}
+
+upstream auth_upstream {
+    server auth:${AUTH_SERVICE_PORT};
+}
+
+upstream page_upstream {
+    server pages:${PAGE_SERVICE_PORT};
+}
+
+server {
+    listen 80;
+    server_name ${SERVER_NAME} www.${SERVER_NAME};
+
+    # redirect all http request to https
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name ${SERVER_NAME} www.${SERVER_NAME};
+
+    ssl_certificate /etc/nginx/certs/${SERVER_NAME}.pem;
+    ssl_certificate_key /etc/nginx/certs/${SERVER_NAME}-key.pem;
+
+    location / {
+        proxy_pass http://frontend_upstream;
+    }
+
+    location /api/v1/auth {
+        proxy_pass http://auth_upstream;
+    }
+
+    location /api/v1/page {
+        proxy_pass http://page_upstream;
+    }
+}

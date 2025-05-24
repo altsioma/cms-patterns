@@ -1,0 +1,99 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: cms-postgres
+    ports:
+      - ${POSTGRES_PORT}:5432
+    environment:
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./db-init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - app-network
+
+  auth:
+    container_name: cms-auth
+    build:
+      context: ../services/auth
+      dockerfile: Dockerfile.prod
+    environment:
+      - AUTH_SERVICE_PORT=${AUTH_SERVICE_PORT}
+      - GLOBAL_PREFIX=api/v1
+      - JWT_SECRET=bd372e6b21ca8784a1849ee94b87fbbdeb0d58f0a7c46ec1a44b7d4f586227de
+      - JWT_EXPIRES_IN=1h
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_NAME=auth_db
+    ports:
+      - ${AUTH_SERVICE_PORT}:3001
+    depends_on:
+      - postgres
+    command: npm run start:prod
+    networks:
+      - app-network
+
+  pages:
+    container_name: cms-pages
+    build:
+      context: ../services/pages
+      dockerfile: Dockerfile.prod
+    environment:
+      - PAGE_SERVICE_PORT=${PAGE_SERVICE_PORT}
+      - GLOBAL_PREFIX=api/v1
+      - JWT_SECRET=bd372e6b21ca8784a1849ee94b87fbbdeb0d58f0a7c46ec1a44b7d4f586227de
+      - JWT_EXPIRES_IN=1h
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_NAME=page_db
+    ports:
+      - ${PAGE_SERVICE_PORT}:3002
+    depends_on:
+      - postgres
+    command: npm run start:prod
+    networks:
+      - app-network
+
+  frontend:
+    container_name: cms-frontend
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile.prod
+    expose:
+      - 80
+    networks:
+      - app-network
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: cms-nginx
+    ports:
+      - ${HTTP_PORT}:80
+      - ${HTTPS_PORT}:443
+    environment:
+      - NGINX_ENVSUBST_TEMPLATE_SUFFIX=.ngconf
+      - SERVER_NAME=${SERVER_NAME}
+      - AUTH_SERVICE_PORT=${AUTH_SERVICE_PORT}
+      - PAGE_SERVICE_PORT=${PAGE_SERVICE_PORT}
+      - FRONTEND_SERVICE_PORT=${FRONTEND_SERVICE_PORT}
+    volumes:
+      - ./nginx/templates/prod:/etc/nginx/templates
+      - ./nginx/certs:/etc/nginx/certs
+    depends_on:
+      - frontend
+      - auth
+      - pages
+    networks:
+      - app-network
+
+volumes:
+  postgres-data:
+
+networks:
+  app-network:

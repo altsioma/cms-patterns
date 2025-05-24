@@ -16,7 +16,7 @@ describe('PageController', () => {
     delete: jest.fn(),
   };
 
-  // моки guard-ов (всегда разрешают доступ)
+  // моки guard-ов (всегда разрешают доступ, тесты логики guard определены в roles.guard)
   const mockAuthGuard = {
     canActivate: jest.fn(() => true),
   };

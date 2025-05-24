@@ -7,10 +7,9 @@ describe('Middleware RolesGuard', () => {
   let reflector: Reflector;
 
   beforeEach(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     reflector = {
       getAllAndOverride: jest.fn(),
-    } as any;
+    } as unknown as Reflector;
     guard = new RolesGuard(reflector);
   });
 
