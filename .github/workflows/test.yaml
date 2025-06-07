@@ -1,0 +1,52 @@
+name: Run tests for all packages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        project:
+          - frontend
+          - services/auth
+          - services/pages
+
+    name: Run tests in ${{ matrix.project }}
+
+    steps:
+      - name: 📥 Checkout repo
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+          cache-dependency-path: ${{ matrix.project }}/package-lock.json
+
+      - name: 📦 Install dependencies
+        working-directory: ${{ matrix.project }}
+        run: npm ci
+
+      - name: 🔬 Run tests with coverage
+        working-directory: ${{ matrix.project }}
+        run: npm run test:cov
+
+      - name: Set safe artifact name
+        id: set_artifact_name
+        run: |
+          SAFE_NAME=$(echo "coverage-${{ matrix.project }}" | sed 's/\//-/g')
+          echo "ARTIFACT_NAME=$SAFE_NAME" >> $GITHUB_ENV
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ matrix.project }}/coverage/
+          if-no-files-found: warn

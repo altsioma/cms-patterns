@@ -1,5 +1,5 @@
 # Сборка приложения
-FROM node:22.15.1-alpine
+FROM node:22.15.1
 
 # Устанавливаем рабочую директорию
 WORKDIR /app
@@ -10,3 +10,6 @@ RUN npm install
 
 # Копируем исходный код
 COPY . .
+
+# Запускаем dev-сервер
+CMD ["npm", "run", "dev", "--", "--host"]
