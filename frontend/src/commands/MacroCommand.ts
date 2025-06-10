@@ -1,12 +1,14 @@
-import type { ICommand } from "../interfaces/ICommand";
+import { injectable } from "inversify";
+import type { ICommand } from "../core/interfaces/ICommand";
 /**
  * Команда для выполнения последовательности других команд (паттерн "Композитная команда").
  * Реализует интерфейс ICommand.
  * @class
  * @implements {ICommand}
  */
+@injectable()
 export class MacroCommand implements ICommand {
-  private commands: ICommand[] = [];
+  private readonly commands: ICommand[] = [];
 
   /**
    * Добавляет команду в очередь выполнения

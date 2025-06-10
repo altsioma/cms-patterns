@@ -78,12 +78,11 @@ make dev-prod
 Фронтенд построен на основе модульной архитектуры с использованием паттернов:
 
 - Dependency Injection
-- Factory
-- Chain of responsibility
-- Middleware
-- Plugin
 - Command
-- Builder
+- Factory
+- Plugin
+- Middleware
+- Chain of responsibility
 
 Подробное описание фронтенд архитектуры можно найти в [frontend/README.md](frontend/README.md).
 

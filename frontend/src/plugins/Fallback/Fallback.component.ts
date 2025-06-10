@@ -1,12 +1,12 @@
-import type { IUIComponent } from "../../core/interfaces/IUIComponent";
+import type { ICommand } from "../../core/interfaces/ICommand";
 
-class FallbackComponent implements IUIComponent {
-  render(): HTMLElement {
+export class FallbackComponent implements ICommand {
+  constructor(private readonly _ctx: HTMLElement) {}
+
+  execute(): void {
     const el = document.createElement("div");
     el.style.cssText = "padding: 1rem; background: #ffe0e0; color: #900;";
     el.innerText = `⚠️ Ошибка: Компонент не найден`;
-    return el;
+    this._ctx.appendChild(el);
   }
 }
-
-export { FallbackComponent as FallbackComponentPlugin };

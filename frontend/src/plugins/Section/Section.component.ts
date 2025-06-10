@@ -1,16 +1,22 @@
-import type { IUIComponent } from "../../core/interfaces/IUIComponent";
+import type { ICommand } from "../../core/interfaces/ICommand";
 import type { SectionProps } from "./types";
 
-export class Section implements IUIComponent {
-  adapter<SectionProps>(params: Record<string, unknown>) {
+export class Section implements ICommand {
+  constructor(
+    private readonly _ctx: HTMLElement,
+    private readonly _params: Record<string, unknown>
+  ) {}
+
+  private adapter<T>(params: Record<string, unknown>) {
     return {
       title: params["title"],
       content: params["content"],
-      buttonText: params["content"],
-    } as SectionProps;
+    } as T;
   }
 
-  render(props: SectionProps): HTMLElement {
+  execute(): void {
+    const props = this.adapter<SectionProps>(this._params);
+
     const section = document.createElement("section");
     section.style.cssText = `
       padding: 2rem;
@@ -36,8 +42,8 @@ export class Section implements IUIComponent {
       color: #666;
       margin-bottom: 2rem;
     `;
-    section.append(title, content);
 
-    return section;
+    section.append(title, content);
+    this._ctx.appendChild(section);
   }
 }

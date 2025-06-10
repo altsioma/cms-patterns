@@ -1,79 +1,54 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { ErrorSection } from "./ErrorSection.component";
-import type { ErrorSectionProps } from "./types";
 
 describe("ErrorSection", () => {
-  const component = new ErrorSection();
+  let container: HTMLElement;
 
-  it("Должен адаптировать параметры с default", () => {
-    const raw = {};
-    const adapted = component.adapter<ErrorSectionProps>(raw);
-
-    expect(adapted).toEqual({
-      errorCode: 500,
-      title: "Ошибка",
-      errorMessage: "Что-то пошло не так",
-      buttonText: undefined,
-      buttonUrl: "#",
-    });
+  beforeEach(() => {
+    container = document.createElement("div");
+    container.id = "test-root";
+    document.body.innerHTML = "";
+    document.body.appendChild(container);
   });
 
-  it("Должен корректно адаптировать переданные параметры", () => {
-    const raw = {
-      errorCode: 404,
-      title: "Not Found",
-      errorMessage: "Страница не найдена",
-      buttonText: "На главную",
-      buttonUrl: "/",
-    };
+  it("Должен рендерить секцию ошибки с дефолтными значениями", () => {
+    const section = new ErrorSection(container, {});
+    section.execute();
 
-    const adapted = component.adapter<ErrorSectionProps>(raw);
+    const renderedSection = container.querySelector(".error-section")!;
+    const code = renderedSection.querySelector(".error-code")!;
+    const title = renderedSection.querySelector(".error-title")!;
+    const button = renderedSection.querySelector(".error-button");
 
-    expect(adapted).toEqual({
-      errorCode: 404,
-      title: "Not Found",
-      errorMessage: "Страница не найдена",
-      buttonText: "На главную",
-      buttonUrl: "/",
-    });
-  });
-
-  it("Должен отрендерить секцию с кнопкой", () => {
-    const props: ErrorSectionProps = {
-      errorCode: 403,
-      title: "Access Denied",
-      errorMessage: "У вас нет доступа",
-      buttonText: "Войти",
-      buttonUrl: "/login",
-    };
-
-    const element = component.render(props);
-
-    expect(element.tagName).toBe("SECTION");
-
-    const code = element.querySelector(".error-code");
-    const title = element.querySelector(".error-title");
-    const button = element.querySelector(".error-button") as HTMLAnchorElement;
-
-    expect(code?.textContent).toBe("403");
-    expect(title?.textContent).toBe("У вас нет доступа");
-
-    expect(button).toBeTruthy();
-    expect(button.textContent).toBe("Войти");
-    expect(button.getAttribute("href")).toBe("/login");
-  });
-
-  it("Не должен отображать кнопку, если buttonText отсутствует", () => {
-    const props: ErrorSectionProps = {
-      errorCode: 500,
-      title: "Ошибка сервера",
-      errorMessage: "Произошла ошибка",
-      buttonUrl: "/retry",
-    };
-
-    const element = component.render(props);
-    const button = element.querySelector(".error-button");
-
+    expect(renderedSection).toBeTruthy();
+    expect(code.textContent).toBe("500");
+    expect(title.textContent).toBe("Что-то пошло не так");
     expect(button).toBeNull();
+  });
+
+  it("Должен рендерить секцию ошибки с кастомными значениями", () => {
+    const customParams = {
+      errorCode: 404,
+      errorMessage: "Страница не найдена",
+      title: "Ошибка 404",
+      buttonText: "На главную",
+      buttonUrl: "/",
+    };
+
+    const section = new ErrorSection(container, customParams);
+    section.execute();
+
+    const renderedSection = container.querySelector(".error-section")!;
+    const code = renderedSection.querySelector(".error-code")!;
+    const title = renderedSection.querySelector(".error-title")!;
+    const button = renderedSection.querySelector(
+      ".error-button"
+    ) as HTMLAnchorElement;
+
+    expect(code.textContent).toBe("404");
+    expect(title.textContent).toBe("Страница не найдена");
+    expect(button).toBeTruthy();
+    expect(button.textContent).toBe("На главную");
+    expect(button.href).toContain("/");
   });
 });

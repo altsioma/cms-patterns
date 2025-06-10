@@ -1,37 +1,42 @@
-import { describe, it, expect } from "vitest";
-import { HeaderPlugin } from "./Header.component";
+import { describe, it, expect, beforeEach } from "vitest";
+import { Header } from "./Header.component";
 
-describe("HeaderPlugin", () => {
-  const component = new HeaderPlugin();
+describe("Header", () => {
+  let container: HTMLElement;
 
-  describe("adapter", () => {
-    it("должен вернуть props типа HeaderProps", () => {
-      const input = { headerTitle: "My App" };
-      const props = component.adapter(input);
-
-      expect(props).toEqual({ headerTitle: "My App" });
-    });
-
-    it("должен возвращать undefined, если параметра нет", () => {
-      const props = component.adapter({});
-      expect(props).toEqual({ headerTitle: undefined });
-    });
+  beforeEach(() => {
+    container = document.createElement("div");
+    document.body.innerHTML = "";
+    document.body.appendChild(container);
   });
 
-  describe("render", () => {
-    it("должен возвращать корректный DOM элемент", () => {
-      const props = { headerTitle: "Dashboard" };
-      const element = component.render(props);
+  it("Должен рендерить header с заголовком", () => {
+    const props = {
+      headerTitle: "Мой сайт",
+    };
 
-      expect(element.tagName).toBe("HEADER");
-      expect(element.className).toBe("header");
+    const component = new Header(container, props);
+    component.execute();
 
-      const logo = element.querySelector(".logo");
-      expect(logo).not.toBeNull();
-      expect(logo?.textContent).toBe("Dashboard");
+    const header = container.querySelector("header");
+    const logo = header?.querySelector(".logo");
 
-      const nav = element.querySelector(".nav");
-      expect(nav).not.toBeNull();
-    });
+    expect(header).not.toBeNull();
+    expect(logo).not.toBeNull();
+    expect(logo?.textContent).toBe("Мой сайт");
+  });
+
+  it("Должен создавать nav элемент с классом nav", () => {
+    const props = {
+      headerTitle: "Заголовок",
+    };
+
+    const component = new Header(container, props);
+    component.execute();
+
+    const nav = container.querySelector("nav");
+
+    expect(nav).not.toBeNull();
+    expect(nav?.className).toBe("nav");
   });
 });

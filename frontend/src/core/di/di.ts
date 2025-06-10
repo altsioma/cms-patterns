@@ -1,4 +1,5 @@
 import { Container } from "inversify";
+import type { DependencyConstructor, DependencyFactory } from "./types";
 
 /**
  * Контейнер зависимостей (DI)
@@ -18,4 +19,16 @@ export function registerDependency<T>(component: any) {
   }
 
   container.bind<T>(component.name).to(component);
+}
+
+export function registerDependencyFactory<T>(
+  name: string,
+  Dependency: DependencyConstructor<T>
+) {
+  // Регистрируем фабрику зависимостей
+  container.bind<DependencyFactory<T>>(name).toFactory(() => {
+    return (...args: unknown[]) => {
+      return new Dependency(...args);
+    };
+  });
 }

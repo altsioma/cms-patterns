@@ -1,15 +1,21 @@
-import type { IUIComponent } from "../../core/interfaces/IUIComponent";
+import type { ICommand } from "../../core/interfaces/ICommand";
 import type { HeaderProps } from "./types";
 
-class Header implements IUIComponent {
-  adapter<HeaderProps>(params: Record<string, unknown>) {
+export class Header implements ICommand {
+  constructor(
+    private readonly _ctx: HTMLElement,
+    private readonly _params: Record<string, unknown>
+  ) {}
+
+  private adapter<T>(params: Record<string, unknown>) {
     return {
       headerTitle: params["headerTitle"],
-    } as HeaderProps;
+    } as T;
   }
 
-  render(props: HeaderProps): HTMLElement {
-    // Контейнер шапки
+  execute(): void {
+    const props = this.adapter<HeaderProps>(this._params);
+
     const header = document.createElement("header");
     header.className = "header";
     header.style.cssText = `
@@ -21,7 +27,6 @@ class Header implements IUIComponent {
       align-items: center;
     `;
 
-    // Логотип в шапке
     const logo = document.createElement("div");
     logo.className = "logo";
     logo.textContent = props.headerTitle;
@@ -30,16 +35,12 @@ class Header implements IUIComponent {
       font-weight: bold;
     `;
 
-    // Меню навигации в шапке
     const nav = document.createElement("nav");
     nav.className = "nav";
     nav.style.display = "flex";
     nav.style.gap = "1rem";
 
     header.append(logo, nav);
-
-    return header;
+    this._ctx.appendChild(header);
   }
 }
-
-export { Header as HeaderPlugin };

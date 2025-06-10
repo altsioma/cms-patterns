@@ -1,7 +1,7 @@
 // MacroCommand.test.ts
 import { describe, it, expect, vi } from "vitest";
 import { MacroCommand } from "./MacroCommand";
-import type { ICommand } from "../interfaces/ICommand";
+import type { ICommand } from "../core/interfaces/ICommand";
 
 describe("MacroCommand", () => {
   it("Должна выполняться последовательность команд", async () => {

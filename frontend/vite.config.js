@@ -13,6 +13,8 @@ export default defineConfig({
     environment: "jsdom",
     coverage: {
       reporter: ["text", "json", "html"],
+      include: ["src/**/*.{ts,tsx}"],
+      exclude: ["src/index.ts", "src/bootstrap/bootstrap.ts"],
     },
   },
 });

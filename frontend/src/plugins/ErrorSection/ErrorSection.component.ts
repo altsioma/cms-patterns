@@ -1,22 +1,28 @@
-import type { IUIComponent } from "../../core/interfaces/IUIComponent";
+import type { ICommand } from "../../core/interfaces/ICommand";
 import type { ErrorSectionProps } from "./types";
 
-export class ErrorSection implements IUIComponent {
-  adapter<ErrorSectionProps>(params: Record<string, unknown>) {
+export class ErrorSection implements ICommand {
+  constructor(
+    private readonly _ctx: HTMLElement,
+    private readonly _params: Record<string, unknown>
+  ) {}
+
+  private adapter<T>(params: Record<string, unknown>) {
     return {
       errorCode: (params.errorCode as number) || 500,
       title: params.title || "Ошибка",
       errorMessage: params.errorMessage || "Что-то пошло не так",
       buttonText: params.buttonText,
       buttonUrl: params.buttonUrl || "#",
-    } as ErrorSectionProps;
+    } as T;
   }
 
-  render(props: ErrorSectionProps): HTMLElement {
+  execute() {
+    const props = this.adapter<ErrorSectionProps>(this._params);
+
     const section = document.createElement("section");
     section.className = "error-section";
 
-    // Основные стили
     section.style.cssText = `
       padding: 3rem 0;
       margin: 0 auto;
@@ -28,7 +34,6 @@ export class ErrorSection implements IUIComponent {
       width: 100%;
     `;
 
-    // Код ошибки
     const errorCode = document.createElement("div");
     errorCode.className = "error-code";
     errorCode.textContent = props.errorCode.toString();
@@ -40,7 +45,6 @@ export class ErrorSection implements IUIComponent {
       line-height: 1;
     `;
 
-    // Заголовок
     const title = document.createElement("h2");
     title.className = "error-title";
     title.textContent = props.errorMessage;
@@ -50,8 +54,7 @@ export class ErrorSection implements IUIComponent {
       color: inherit;
     `;
 
-    // Кнопка (если есть)
-    let button: HTMLAnchorElement | string = "";
+    let button: HTMLAnchorElement | null = null;
     if (props.buttonText && props.buttonUrl) {
       button = document.createElement("a");
       button.className = "error-button";
@@ -60,8 +63,8 @@ export class ErrorSection implements IUIComponent {
       button.style.cssText = `
         display: inline-block;
         padding: 0.75rem 1.5rem;
-        background: 1a73e8;
-        color: #1a73e8;
+        background: #1a73e8;
+        color: #fff;
         text-decoration: none;
         border-radius: 4px;
         font-weight: 500;
@@ -71,8 +74,12 @@ export class ErrorSection implements IUIComponent {
       `;
     }
 
-    section.append(errorCode, title, button);
+    section.append(errorCode, title);
 
-    return section;
+    if (button) {
+      section.append(button);
+    }
+
+    this._ctx.append(section);
   }
 }

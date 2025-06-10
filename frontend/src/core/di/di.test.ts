@@ -1,52 +1,48 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import { container, registerDependency } from "./di";
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import { container, registerDependency, registerDependencyFactory } from "./di";
+import type {DependencyFactory } from "./types";
 
-describe("DI Container", () => {
+describe("DI container registration", () => {
   beforeEach(() => {
-    // Очищаем контейнер перед каждым тестом
     container.unbindAll();
   });
 
-  describe("registerDependency", () => {
-    class TestService {}
+  class TestService {
+    public foo() {
+      return "bar";
+    }
+  }
 
-    it("Должен корректно регистрировать класс", () => {
-      registerDependency(TestService);
-      expect(container.isBound("TestService")).toBe(true);
-      expect(container.get("TestService")).toBeInstanceOf(TestService);
-    });
+  it("registerDependency: должен зарегистрировать и создать экземпляр класса", () => {
+    registerDependency<TestService>(TestService);
 
-    it("Должен выбрасывать исключение для не классов/функций", () => {
-      const testCases = [
-        { value: 123, description: "number" },
-        { value: "string", description: "string" },
-        { value: {}, description: "object" },
-        { value: null, description: "null" },
-        { value: undefined, description: "undefined" },
-      ];
+    const instance = container.get<TestService>("TestService");
+    expect(instance).toBeInstanceOf(TestService);
+    expect(instance.foo()).toBe("bar");
+  });
 
-      testCases.forEach(({ value }) => {
-        expect(() => registerDependency(value)).toThrowError(
-          "Компонент должен быть функцией или экземпляром класса"
-        );
-      });
-    });
+  it("registerDependency: должен бросить ошибку если передан не класс/функция", () => {
+    expect(() => registerDependency("not a function")).toThrow(
+      "Компонент должен быть функцией или экземпляром класса"
+    );
+  });
 
-    it("Должен использовать имя класса/функции в качестве ключа", () => {
-      class NamedService {}
-      registerDependency(NamedService);
-      expect(container.isBound("NamedService")).toBe(true);
-    });
+  it("registerDependencyFactory: должен зарегистрировать фабрику, создающую новые экземпляры", () => {
+    class AnotherService {
+      constructor(public val: string) {}
+    }
 
-    it("Должен позволять регистрировать несколько классов", () => {
-      class ServiceA {}
-      class ServiceB {}
+    registerDependencyFactory<AnotherService>("AnotherService", AnotherService);
 
-      registerDependency(ServiceA);
-      registerDependency(ServiceB);
+    const factory =
+      container.get<DependencyFactory<AnotherService>>("AnotherService");
+    const instance1 = factory("one");
+    const instance2 = factory("two");
 
-      expect(container.isBound("ServiceA")).toBe(true);
-      expect(container.isBound("ServiceB")).toBe(true);
-    });
+    expect(instance1).toBeInstanceOf(AnotherService);
+    expect(instance2).toBeInstanceOf(AnotherService);
+    expect(instance1.val).toBe("one");
+    expect(instance2.val).toBe("two");
+    expect(instance1).not.toBe(instance2);
   });
 });

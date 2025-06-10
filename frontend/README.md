@@ -9,12 +9,11 @@
 ```
 frontend/
 ├── src/                   # Исходный код
-│   ├── app/               # Главный модуль приложения
 │   ├── bootstrap/         # Код инициализации приложения
+│   ├── commands/          # Команды приложения
 │   ├── core/              # Базовые интерфейсы и DI
-│   ├── render/            # Реализация HTML-рендеринга
-│   ├── middleware/        # Middleware для обработки запросов/ответов
-│   ├── mocks/             # Моки для тестов
+│   └── middleware/        # Middleware
+│       └── http/          # Middleware для обработки http-запросов/ответов
 │   ├── plugins/           # Плагины-компоненты
 │   ├── services/          # Сервисы бизнес-логики
 │   └── shared/            # Общие компоненты и утилиты
@@ -59,7 +58,7 @@ yarn dev
 1. Инициализация:
 
 ```ts
-bootstrap(document.getElementById("root"));
+bootstrap();
 ```
 
 2. Поток данных
@@ -81,19 +80,26 @@ bootstrap(document.getElementById("root"));
 
 Плагины представляют собой UI-компоненты, расположенные в папке plugins. Каждый плагин должен:
 
-1. Экспортировать класс компонента, реализующий IUIComponent
-2. Иметь метод render, возвращающий HTMLElement
+1. Экспортировать класс компонента, реализующий ICommand
+2. Иметь метод execute, запускающий рендеринг текущего компонента
 3. (Опционально) Может включать адаптер для преобразования props
 
-#### Пример плагина:
+#### Шаблон плагина
 
 ```ts
-// plugins/Header/Header.component.ts
-export class Header implements IUIComponent {
-  render(props: any): HTMLElement {
-    const header = document.createElement("header");
-    // ... реализация рендеринга
-    return header;
+import type { MyComponentProps } from "./types";
+
+export class MyComponent implements ICommand {
+  private adapter<MyComponentProps>(params: Record<string, unknown>) {
+    return {
+      // преобразование параметров
+    };
+  }
+
+  execute() {
+    const props = this.adapter<ErrorSectionProps>(this._params);
+    // логика рендеринга
+    this._ctx.append(errorCode, title);
   }
 }
 ```
@@ -139,8 +145,8 @@ const modules = import.meta.glob("../plugins/**/*.component.ts");
 
 1. Структура компонента:
 
-   - Обязательная реализация IUIComponent
-   - Метод render() возвращает HTMLElement
+   - Обязательная реализация ICommand
+   - Метод render() рендерит текущий компонент в переданный родитель ctx: HTMLElement
    - Опциональный адаптер параметров
 
 2. Стилизация:
@@ -160,24 +166,3 @@ const modules = import.meta.glob("../plugins/**/*.component.ts");
 5. Регистрация:
    - Автоматическая при соблюдении структуры
    - Имя компонента = имя класса
-
-#### Шаблон нового плагина
-
-```ts
-import type { IUIComponent } from "../../core/interfaces/IUIComponent";
-import type { MyComponentProps } from "./types";
-
-export class MyComponent implements IUIComponent {
-  adapter<MyComponentProps>(params: Record<string, unknown>) {
-    return {
-      // преобразование параметров
-    } as MyComponentProps;
-  }
-
-  render(props: MyComponentProps): HTMLElement {
-    const element = document.createElement("div");
-    // логика рендеринга
-    return element;
-  }
-}
-```

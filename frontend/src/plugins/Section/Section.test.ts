@@ -1,54 +1,33 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { Section } from "./Section.component";
 
 describe("Section", () => {
-  const component = new Section();
+  let container: HTMLElement;
 
-  describe("adapter", () => {
-    it("должен корректно адаптировать параметры", () => {
-      const input = {
-        title: "О нас",
-        content: "Контент секции",
-      };
-      const result = component.adapter(input);
-
-      expect(result).toEqual({
-        title: "О нас",
-        content: "Контент секции",
-        buttonText: "Контент секции", // как в оригинальном коде
-      });
-    });
-
-    it("должен вернуть undefined, если параметры не переданы", () => {
-      const result = component.adapter({});
-      expect(result).toEqual({
-        title: undefined,
-        content: undefined,
-        buttonText: undefined,
-      });
-    });
+  beforeEach(() => {
+    container = document.createElement("div");
+    document.body.innerHTML = "";
+    document.body.appendChild(container);
   });
 
-  describe("render", () => {
-    it("должен создавать секцию с заголовком и текстом", () => {
-      const props = {
-        title: "Заголовок секции",
-        content: "Описание секции",
-        buttonText: "Кнопка", // не используется, но присутствует в props
-      };
+  it("рендерит секцию с заголовком и контентом", () => {
+    const props = {
+      title: "О нас",
+      content: "Мы разрабатываем современные веб-приложения.",
+      buttonText: "Подробнее",
+    };
 
-      const el = component.render(props);
+    const component = new Section(container, props);
+    component.execute();
 
-      expect(el.tagName).toBe("SECTION");
+    const section = container.querySelector("section");
+    const title = section?.querySelector("h2");
+    const paragraph = section?.querySelector("p");
 
-      const h2 = el.querySelector("h2");
-      const p = el.querySelector("p");
-
-      expect(h2).not.toBeNull();
-      expect(h2?.textContent).toBe("Заголовок секции");
-
-      expect(p).not.toBeNull();
-      expect(p?.textContent).toBe("Описание секции");
-    });
+    expect(section).not.toBeNull();
+    expect(title?.textContent).toBe("О нас");
+    expect(paragraph?.textContent).toBe(
+      "Мы разрабатываем современные веб-приложения."
+    );
   });
 });

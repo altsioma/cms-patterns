@@ -1,48 +1,66 @@
-import { describe, it, expect } from "vitest";
-import { FooterPlugin } from "./Footer.component";
-import type { FooterProps } from "./types";
+import { describe, it, expect, beforeEach } from "vitest";
+import { Footer } from "./Footer.component";
 
-describe("FooterPlugin", () => {
-  const footer = new FooterPlugin();
+describe("Footer", () => {
+  let container: HTMLElement;
 
-  it("Должен адаптировать параметры корректно", () => {
-    const params = {
-      copyrightText: "© 2025 My Company",
-      links: [
-        { url: "/about", text: "About" },
-        { url: "/contact", text: "Contact" },
-      ],
-    };
-
-    const adapted = footer.adapter<FooterProps>(params);
-
-    expect(adapted).toEqual({
-      copyrightText: "© 2025 My Company",
-      links: [
-        { url: "/about", text: "About" },
-        { url: "/contact", text: "Contact" },
-      ],
-    });
+  beforeEach(() => {
+    container = document.createElement("div");
+    document.body.innerHTML = "";
+    document.body.appendChild(container);
   });
 
-  it("Должен корректно отрендерить футер с ссылками", () => {
-    const props: FooterProps = {
-      copyrightText: "© 2025 Test Corp",
+  it("Должен рендерить футер с текстом и ссылками", () => {
+    const props = {
+      copyrightText: "© 2025 Моя компания",
       links: [
-        { url: "/home", text: "Home" },
-        { url: "/blog", text: "Blog" },
+        { url: "/privacy", text: "Политика конфиденциальности" },
+        { url: "/terms", text: "Условия использования" },
       ],
     };
 
-    const element = footer.render(props);
+    const component = new Footer(container, props);
+    component.execute();
 
-    expect(element.tagName).toBe("FOOTER");
-    expect(element.querySelector("p")?.textContent).toBe("© 2025 Test Corp");
+    const footer = container.querySelector("footer")!;
+    const text = footer.querySelector("p")!;
+    const links = footer.querySelectorAll("a");
 
-    const links = element.querySelectorAll("a");
+    expect(footer).not.toBeNull();
+    expect(text.textContent).toBe("© 2025 Моя компания");
     expect(links.length).toBe(2);
-    expect(links[0].textContent).toBe("Home");
-    expect(links[0].getAttribute("href")).toBe("/home");
-    expect(links[1].textContent).toBe("Blog");
+    expect(links[0].href).toContain("/privacy");
+    expect(links[0].textContent).toBe("Политика конфиденциальности");
+  });
+
+  it("Должен рендерить футер без ссылок, если массив ссылок пуст", () => {
+    const props = {
+      copyrightText: "© 2025 Моя компания",
+      links: [],
+    };
+
+    const component = new Footer(container, props);
+    component.execute();
+
+    const footer = container.querySelector("footer")!;
+    const links = footer.querySelectorAll("a");
+
+    expect(footer).not.toBeNull();
+    expect(links.length).toBe(0);
+  });
+
+  it("Не должен рендерить блок ccskjr, если links отсутствует", () => {
+    const props = {
+      copyrightText: "Все права защищены",
+    };
+
+    const component = new Footer(container, props);
+    component.execute();
+
+    const footer = container.querySelector("footer")!;
+    const linksBlock = footer.querySelector("a");
+
+    expect(footer).not.toBeNull();
+    expect(linksBlock).toBeNull();
   });
 });

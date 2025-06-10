@@ -1,15 +1,22 @@
-import type { IUIComponent } from "../../core/interfaces/IUIComponent";
+import type { ICommand } from "../../core/interfaces/ICommand";
 import type { FooterProps } from "./types";
 
-class Footer implements IUIComponent {
-  adapter<FooterProps>(params: Record<string, unknown>) {
+export class Footer implements ICommand {
+  constructor(
+    private readonly _ctx: HTMLElement,
+    private readonly _params: Record<string, unknown>
+  ) {}
+
+  private adapter<T>(params: Record<string, unknown>) {
     return {
       copyrightText: params["copyrightText"],
       links: params["links"],
-    } as FooterProps;
+    } as T;
   }
 
-  render(props: FooterProps): HTMLElement {
+  execute(): void {
+    const props = this.adapter<FooterProps>(this._params);
+
     const footer = document.createElement("footer");
     footer.style.cssText = `
       background: #1a1a1a;
@@ -21,7 +28,6 @@ class Footer implements IUIComponent {
     const copyright = document.createElement("p");
     copyright.textContent = props.copyrightText;
     copyright.style.marginBottom = "1rem";
-
     footer.appendChild(copyright);
 
     if (props.links?.length) {
@@ -42,8 +48,6 @@ class Footer implements IUIComponent {
       footer.appendChild(linksContainer);
     }
 
-    return footer;
+    this._ctx.appendChild(footer);
   }
 }
-
-export { Footer as FooterPlugin };
